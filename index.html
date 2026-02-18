@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>lbblaise</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #000;
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      cursor: crosshair;
+    }
+
+    #hint {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: rgba(180, 160, 255, 0.55);
+      font: 12px/1 'Courier New', monospace;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      pointer-events: none;
+      white-space: nowrap;
+      animation: breathe 3s ease-in-out infinite;
+      transition: opacity 1s;
+    }
+
+    @keyframes breathe {
+      0%, 100% { opacity: 0.3; }
+      50%       { opacity: 0.9; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+  <div id="hint">hover &bull; a starburst awaits &bull; click to connect</div>
+
+  <script>
+  (() => {
+    // ── LINKEDIN URL ── change this to your real profile URL ──────────────
+    const LINKEDIN = 'https://www.linkedin.com/in/lbblaise';
+    // ─────────────────────────────────────────────────────────────────────
+
+    const canvas = document.getElementById('c');
+    const ctx    = canvas.getContext('2d');
+    const hint   = document.getElementById('hint');
+
+    let W, H, CX, CY;
+
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+      CX = W / 2;
+      CY = H / 2;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // ── PALETTE ────────────────────────────────────────────────────────────
+    const STAR_COLORS = [
+      [255,255,255], [210,225,255], [255,245,200],
+      [180,200,255], [255,210,180], [210,160,255],
+      [160,220,255], [255,180,220],
+    ];
+
+    function pickColor() {
+      const [r,g,b] = STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)];
+      return { r, g, b };
+    }
+
+    // ── STAR ───────────────────────────────────────────────────────────────
+    // Stars live on the surface / interior of a rotating cylinder.
+    // Cylindrical coords: theta (angle around Y axis), rho (distance from axis),
+    // yy (height along axis).
+    class Star {
+      constructor() { this.reset(true); }
+
+      reset(init = false) {
+        const maxR = Math.min(W, H) * 0.42;
+        // Bias toward middle radii for a galaxy-disc look
+        this.rho   = maxR * (0.05 + Math.pow(Math.random(), 0.55) * 0.95);
+        this.theta = Math.random() * Math.PI * 2;
+        // Add a spiral-arm offset: group stars into ~3 arms
+        if (Math.random() < 0.6) {
+          const arm = Math.floor(Math.random() * 3);
+          this.theta += (arm / 3) * Math.PI * 2 + (this.rho / maxR) * Math.PI * 3;
+          this.theta += (Math.random() - 0.5) * 0.8; // fuzz
+        }
+        this.yy = (Math.random() - 0.5) * Math.min(W, H) * 0.38;
+
+        // Inner stars rotate faster (like a real galaxy disc)
+        const normR = this.rho / maxR;
+        this.dtheta = (0.0008 + (1 - normR) * 0.0035) * (Math.random() < 0.85 ? 1 : -0.4);
+
+        // Starburst on init: start scattered then converge — skip on first load
+        if (!init) {
+          this.theta += (Math.random() - 0.5) * 0.3;
+        }
+
+        this.baseSize  = 0.4 + Math.random() * 2.2;
+        this.baseAlpha = 0.35 + Math.random() * 0.65;
+        this.twinkle   = Math.random() * Math.PI * 2;
+        this.twinkleSpd= 0.015 + Math.random() * 0.045;
+        const c = pickColor();
+        this.r = c.r; this.g = c.g; this.b = c.b;
+      }
+
+      step() {
+        this.theta  += this.dtheta;
+        this.twinkle += this.twinkleSpd;
+      }
+
+      project(fov = 520) {
+        // x = right, y = up, z = toward viewer
+        const x3 = Math.cos(this.theta) * this.rho;
+        const y3 = this.yy;
+        const z3 = Math.sin(this.theta) * this.rho;
+
+        // z3 is -maxR..+maxR; shift so behind-camera stars don't appear
+        const zd   = z3 + fov + Math.min(W, H) * 0.42 + 10;
+        const scale = fov / zd;
+
+        return {
+          sx   : CX + x3 * scale,
+          sy   : CY + y3 * scale * 0.55,   // slight vertical compression → disc
+          scale,
+        };
+      }
+
+      draw() {
+        const { sx, sy, scale } = this.project();
+        if (sx < -20 || sx > W + 20 || sy < -20 || sy > H + 20) return;
+
+        const tw    = 0.78 + 0.22 * Math.sin(this.twinkle);
+        const alpha = this.baseAlpha * tw * Math.min(1, scale * 2.2);
+        const size  = Math.max(0.3, this.baseSize * scale * 1.8);
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
+
+        // Soft glow halo for the brighter stars
+        if (this.baseAlpha > 0.65 && size > 0.9) {
+          const haloR = size * 4.5;
+          const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, haloR);
+          g.addColorStop(0,   `rgba(${this.r},${this.g},${this.b},0.35)`);
+          g.addColorStop(0.5, `rgba(${this.r},${this.g},${this.b},0.08)`);
+          g.addColorStop(1,   'rgba(0,0,0,0)');
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(sx, sy, haloR, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.fillStyle = `rgb(${this.r},${this.g},${this.b})`;
+        ctx.beginPath();
+        ctx.arc(sx, sy, size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // ── PARTICLE (starburst piece) ─────────────────────────────────────────
+    class Particle {
+      constructor(x, y, burst = false) {
+        this.x = x; this.y = y;
+        const angle = Math.random() * Math.PI * 2;
+        const spd   = burst
+          ? (2 + Math.random() * 7)
+          : (0.5 + Math.random() * 3);
+        this.vx   = Math.cos(angle) * spd;
+        this.vy   = Math.sin(angle) * spd;
+        this.life = 1;
+        this.decay= 0.008 + Math.random() * 0.022;
+        this.size = 0.8 + Math.random() * 2.5;
+        // Gold → white → orange palette
+        const hue = 25 + Math.random() * 55;
+        const lit = 65 + Math.random() * 35;
+        this.hue  = hue; this.lit = lit;
+      }
+
+      step() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vx *= 0.96; this.vy *= 0.96;
+        this.life -= this.decay;
+        this.size *= 0.975;
+      }
+
+      draw() {
+        if (this.life <= 0) return;
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, this.life);
+        ctx.fillStyle   = `hsl(${this.hue},100%,${this.lit}%)`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, Math.max(0.1, this.size), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      alive() { return this.life > 0 && this.size > 0.05; }
+    }
+
+    // ── STARBURST ─────────────────────────────────────────────────────────
+    class Starburst {
+      constructor(x, y) {
+        this.x = x; this.y = y;
+        this.phase     = 0;
+        this.age       = 0;
+        this.hovered   = false;
+        this.particles = [];
+        // Initial explosion
+        for (let i = 0; i < 120; i++) {
+          this.particles.push(new Particle(x, y, true));
+        }
+      }
+
+      get hitR() { return 38 + 14 * Math.sin(this.phase); }
+
+      step() {
+        this.phase += 0.04;
+        this.age++;
+        this.particles = this.particles.filter(p => p.alive());
+        this.particles.forEach(p => p.step());
+
+        if (this.hovered) {
+          for (let i = 0; i < 10; i++) {
+            this.particles.push(new Particle(this.x, this.y, false));
+          }
+        }
+      }
+
+      draw() {
+        // Particles
+        this.particles.forEach(p => p.draw());
+
+        const pulse = 0.82 + 0.18 * Math.sin(this.phase);
+        const r     = 22 * pulse;
+
+        // Outer radial glow
+        const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r * 4);
+        grd.addColorStop(0,   `rgba(255,220,80,${0.75 * pulse})`);
+        grd.addColorStop(0.35,`rgba(255,100,20,${0.35 * pulse})`);
+        grd.addColorStop(0.7, `rgba(120,30,180,${0.12 * pulse})`);
+        grd.addColorStop(1,   'rgba(0,0,0,0)');
+        ctx.fillStyle = grd;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, r * 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 8-point star shape
+        this._star(r, 8, 0.38);
+
+        // Second overlapping star rotated 22.5°
+        this._star(r * 0.7, 8, 0.45, Math.PI / 8);
+
+        // Hover ring + label
+        if (this.hovered) {
+          ctx.save();
+          ctx.strokeStyle = `rgba(255,255,180,${0.55 + 0.35 * Math.sin(this.phase * 2)})`;
+          ctx.lineWidth   = 1.5;
+          ctx.setLineDash([5, 7]);
+          ctx.lineDashOffset = -this.age * 0.6;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, r * 3.2, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+
+          ctx.save();
+          ctx.globalAlpha  = 0.9;
+          ctx.fillStyle    = '#fff';
+          ctx.font         = 'bold 11px "Courier New", monospace';
+          ctx.textAlign    = 'center';
+          ctx.letterSpacing= '2px';
+          ctx.fillText('→ LinkedIn', this.x, this.y - r * 4.2);
+          ctx.restore();
+        }
+      }
+
+      _star(outerR, spikes, innerFrac, extraRot = 0) {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.phase * 0.45 + extraRot);
+        ctx.beginPath();
+        const total = spikes * 2;
+        for (let i = 0; i < total; i++) {
+          const rad = i % 2 === 0 ? outerR : outerR * innerFrac;
+          const ang = (i / total) * Math.PI * 2 - Math.PI / 2;
+          i === 0
+            ? ctx.moveTo(rad * Math.cos(ang), rad * Math.sin(ang))
+            : ctx.lineTo(rad * Math.cos(ang), rad * Math.sin(ang));
+        }
+        ctx.closePath();
+        ctx.fillStyle = `rgba(255,245,130,0.88)`;
+        ctx.fill();
+        ctx.restore();
+      }
+
+      containsMouse(mx, my) {
+        const dx = mx - this.x, dy = my - this.y;
+        return Math.sqrt(dx * dx + dy * dy) < this.hitR;
+      }
+
+      expired() {
+        // Keep it alive for a good long while; remove if very old & silent
+        return this.age > 900 && this.particles.length === 0;
+      }
+    }
+
+    // ── SCENE SETUP ───────────────────────────────────────────────────────
+    const STAR_COUNT = 1600;
+    const stars = Array.from({ length: STAR_COUNT }, () => new Star());
+    let bursts  = [];
+    let mouse   = { x: CX, y: CY };
+    let cooldown = 0;          // frames between auto-burst spawns
+    let interacted = false;
+
+    // ── BACKGROUND LAYERS ────────────────────────────────────────────────
+    function drawBackground(t) {
+      // Deep-space radial gradient
+      const bg = ctx.createRadialGradient(CX, CY, 0, CX, CY, Math.hypot(W, H) * 0.7);
+      bg.addColorStop(0,   '#0c0020');
+      bg.addColorStop(0.4, '#060012');
+      bg.addColorStop(0.8, '#02000d');
+      bg.addColorStop(1,   '#000004');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    function drawNebulae(t) {
+      // Three slowly drifting nebula clouds
+      const clouds = [
+        { hue: 270, ox: -120, oy: -60 },
+        { hue: 220, ox:  130, oy:  70 },
+        { hue: 310, ox:  -30, oy:  120 },
+      ];
+      clouds.forEach(({ hue, ox, oy }) => {
+        const nx = CX + ox + Math.sin(t * 0.00047 + hue) * 25;
+        const ny = CY + oy + Math.cos(t * 0.00039 + hue) * 18;
+        const r  = Math.min(W, H) * 0.38;
+        const g  = ctx.createRadialGradient(nx, ny, 0, nx, ny, r);
+        g.addColorStop(0,   `hsla(${hue},80%,35%,0.07)`);
+        g.addColorStop(0.5, `hsla(${hue},70%,25%,0.03)`);
+        g.addColorStop(1,   'rgba(0,0,0,0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, W, H);
+      });
+    }
+
+    function drawCore(t) {
+      // Galactic core glow
+      const pulse = 0.88 + 0.12 * Math.sin(t * 0.001);
+      const cr    = Math.min(W, H) * 0.08 * pulse;
+      const g = ctx.createRadialGradient(CX, CY, 0, CX, CY, cr * 4);
+      g.addColorStop(0,   `rgba(255,235,160,${0.3 * pulse})`);
+      g.addColorStop(0.2, `rgba(200,120,255,${0.18 * pulse})`);
+      g.addColorStop(0.6, `rgba(60,10,120,${0.07 * pulse})`);
+      g.addColorStop(1,   'rgba(0,0,0,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(CX, CY, cr * 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Sort stars back-to-front (painter's algorithm) using z depth
+    function starsDepthSorted() {
+      return stars.slice().sort((a, b) => {
+        const za = Math.sin(a.theta) * a.rho;
+        const zb = Math.sin(b.theta) * b.rho;
+        return za - zb; // far → near
+      });
+    }
+
+    // ── MOUSE HANDLING ────────────────────────────────────────────────────
+    canvas.addEventListener('mousemove', e => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+
+      let overBurst = false;
+      bursts.forEach(b => {
+        b.hovered = b.containsMouse(mouse.x, mouse.y);
+        if (b.hovered) overBurst = true;
+      });
+
+      canvas.style.cursor = overBurst ? 'pointer' : 'crosshair';
+
+      // Spawn a starburst at cursor (rate-limited; skip if hovering an existing one)
+      if (!overBurst && cooldown <= 0) {
+        // Cap the number of concurrent bursts for performance
+        if (bursts.length >= 5) bursts.shift();
+        bursts.push(new Starburst(mouse.x, mouse.y));
+        cooldown = 55;
+        if (!interacted) {
+          interacted = true;
+          hint.style.opacity = '0';
+        }
+      }
+    });
+
+    canvas.addEventListener('click', e => {
+      const mx = e.clientX, my = e.clientY;
+      const hit = bursts.find(b => b.containsMouse(mx, my));
+      if (hit) {
+        window.open(LINKEDIN, '_blank', 'noopener,noreferrer');
+      } else {
+        // Click anywhere else: instant burst at click point
+        if (bursts.length >= 5) bursts.shift();
+        bursts.push(new Starburst(mx, my));
+        cooldown = 30;
+      }
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      bursts.forEach(b => { b.hovered = false; });
+      canvas.style.cursor = 'crosshair';
+    });
+
+    // ── MAIN LOOP ─────────────────────────────────────────────────────────
+    let sorted = starsDepthSorted();
+    let sortTimer = 0;
+
+    function loop(t) {
+      requestAnimationFrame(loop);
+      if (cooldown > 0) cooldown--;
+
+      // Re-sort every 20 frames (avoid per-frame sort on 1600 stars)
+      if (++sortTimer >= 20) {
+        sorted = starsDepthSorted();
+        sortTimer = 0;
+      }
+
+      drawBackground(t);
+      drawNebulae(t);
+      drawCore(t);
+
+      // Update + draw stars
+      stars.forEach(s => s.step());
+      sorted.forEach(s => s.draw());
+
+      // Update + draw starbursts
+      bursts.forEach(b => b.step());
+      bursts.forEach(b => b.draw());
+      bursts = bursts.filter(b => !b.expired());
+    }
+
+    requestAnimationFrame(loop);
+  })();
+  </script>
+</body>
+</html>
