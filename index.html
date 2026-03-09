@@ -5,215 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Liam Barnes | Startup Marketer, AI Tinkerer</title>
   <meta name="description" content="Startup marketer, attempting to tinker with AI enough so that I seem smarter than I actually am." />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌌</text></svg>" />
-  <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; background: #000; overflow: hidden; }
-    canvas { display: block; cursor: crosshair; }
-    #hint {
-      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
-      color: rgba(220, 160, 255, 0.55); font: 12px/1 'Courier New', monospace;
-      letter-spacing: 3px; text-transform: uppercase; pointer-events: none;
-      white-space: nowrap; animation: breathe 3s ease-in-out infinite; transition: opacity 1s;
-    }
-    @keyframes breathe { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.9; } }
-  </style>
-</head>
-<body>
-  <canvas id="c"></canvas>
-  <div id="hint">hover a starburst &bull; click to connect</div>
-  <script>
-  (() => {
-    const LINKS = [
-      { label: '\u2192 LinkedIn', url: 'https://www.linkedin.com/in/liambarnes44/' },
-      { label: '\u2192 Capsule',  url: 'https://trycapsule.ai' },
-    ];
-    const canvas = document.getElementById('c');
-    const ctx = canvas.getContext('2d');
-    const hint = document.getElementById('hint');
-    let W, H, CX, CY;
-    let linkBursts = null;
-    function resize() {
-      W = canvas.width = window.innerWidth;
-      H = canvas.height = window.innerHeight;
-      CX = W / 2; CY = H / 2;
-      if (linkBursts && linkBursts.length === 2) {
-        const gap = Math.min(W, H) * 0.12;
-        linkBursts[0].x = CX - gap; linkBursts[0].y = CY;
-        linkBursts[1].x = CX + gap; linkBursts[1].y = CY;
-      }
-    }
-    resize();
-    window.addEventListener('resize', resize);
-    const SC = [[255,255,255],[240,220,255],[255,200,240],[220,160,255],[255,130,220],[180,140,255],[255,180,255],[200,200,255],[255,160,200],[170,120,255]];
-    function pickColor() { const [r,g,b] = SC[Math.floor(Math.random()*SC.length)]; return {r,g,b}; }
-    class Star {
-      constructor() { this.reset(true); }
-      reset(init=false) {
-        const maxR=Math.min(W,H)*0.42;
-        this.rho=maxR*(0.05+Math.pow(Math.random(),0.55)*0.95);
-        this.theta=Math.random()*Math.PI*2;
-        if(Math.random()<0.6){const arm=Math.floor(Math.random()*3);this.theta+=(arm/3)*Math.PI*2+(this.rho/maxR)*Math.PI*3;this.theta+=(Math.random()-0.5)*0.8;}
-        this.yy=(Math.random()-0.5)*Math.min(W,H)*0.38;
-        const normR=this.rho/maxR;
-        this.dtheta=(0.0008+(1-normR)*0.0035)*(Math.random()<0.85?1:-0.4);
-        if(!init)this.theta+=(Math.random()-0.5)*0.3;
-        this.baseSize=0.4+Math.random()*2.2;this.baseAlpha=0.35+Math.random()*0.65;
-        this.twinkle=Math.random()*Math.PI*2;this.twinkleSpd=0.015+Math.random()*0.045;
-        const c=pickColor();this.r=c.r;this.g=c.g;this.b=c.b;
-      }
-      step(){this.theta+=this.dtheta;this.twinkle+=this.twinkleSpd;}
-      project(fov=520){
-        const x3=Math.cos(this.theta)*this.rho,y3=this.yy,z3=Math.sin(this.theta)*this.rho;
-        const zd=z3+fov+Math.min(W,H)*0.42+10,scale=fov/zd;
-        return{sx:CX+x3*scale,sy:CY+y3*scale*0.55,scale};
-      }
-      draw(){
-        const{sx,sy,scale}=this.project();
-        if(sx<-20||sx>W+20||sy<-20||sy>H+20)return;
-        const tw=0.78+0.22*Math.sin(this.twinkle);
-        const alpha=this.baseAlpha*tw*Math.min(1,scale*2.2);
-        const size=Math.max(0.3,this.baseSize*scale*1.8);
-        ctx.save();ctx.globalAlpha=alpha;
-        if(this.baseAlpha>0.65&&size>0.9){
-          const hR=size*4.5;const g=ctx.createRadialGradient(sx,sy,0,sx,sy,hR);
-          g.addColorStop(0,'rgba('+this.r+','+this.g+','+this.b+',0.35)');
-          g.addColorStop(0.5,'rgba('+this.r+','+this.g+','+this.b+',0.08)');
-          g.addColorStop(1,'rgba(0,0,0,0)');
-          ctx.fillStyle=g;ctx.beginPath();ctx.arc(sx,sy,hR,0,Math.PI*2);ctx.fill();
-        }
-        ctx.fillStyle='rgb('+this.r+','+this.g+','+this.b+')';
-        ctx.beginPath();ctx.arc(sx,sy,size,0,Math.PI*2);ctx.fill();ctx.restore();
-      }
-    }
-    class Particle {
-      constructor(x,y,burst=false){
-        this.x=x;this.y=y;
-        const a=Math.random()*Math.PI*2;
-        const s=burst?(2+Math.random()*7):(0.5+Math.random()*3);
-        this.vx=Math.cos(a)*s;this.vy=Math.sin(a)*s;
-        this.life=1;this.decay=0.008+Math.random()*0.022;this.size=0.8+Math.random()*2.5;
-        this.hue=270+Math.random()*60;this.lit=70+Math.random()*30;
-      }
-      step(){this.x+=this.vx;this.y+=this.vy;this.vx*=0.96;this.vy*=0.96;this.life-=this.decay;this.size*=0.975;}
-      draw(){
-        if(this.life<=0)return;
-        ctx.save();ctx.globalAlpha=Math.max(0,this.life);
-        ctx.fillStyle='hsl('+this.hue+',100%,'+this.lit+'%)';
-        ctx.beginPath();ctx.arc(this.x,this.y,Math.max(0.1,this.size),0,Math.PI*2);ctx.fill();ctx.restore();
-      }
-      alive(){return this.life>0&&this.size>0.05;}
-    }
-    class Starburst {
-      constructor(x,y,li=-1){
-        this.x=x;this.y=y;this.linkIdx=li;this.persistent=li>=0;
-        this.phase=0;this.age=0;this.hovered=false;this.particles=[];
-        for(let i=0;i<120;i++)this.particles.push(new Particle(x,y,true));
-      }
-      get hitR(){return 38+14*Math.sin(this.phase);}
-      step(){
-        this.phase+=0.04;this.age++;
-        this.particles=this.particles.filter(p=>p.alive());
-        this.particles.forEach(p=>p.step());
-        if(this.persistent&&this.particles.length<8)this.particles.push(new Particle(this.x,this.y,false));
-        if(this.hovered)for(let i=0;i<10;i++)this.particles.push(new Particle(this.x,this.y,false));
-      }
-      draw(){
-        this.particles.forEach(p=>p.draw());
-        const pulse=0.82+0.18*Math.sin(this.phase),r=22*pulse;
-        const grd=ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,r*4);
-        grd.addColorStop(0,'rgba(255,180,255,'+(0.75*pulse)+')');
-        grd.addColorStop(0.35,'rgba(200,60,255,'+(0.35*pulse)+')');
-        grd.addColorStop(0.7,'rgba(100,20,180,'+(0.12*pulse)+')');
-        grd.addColorStop(1,'rgba(0,0,0,0)');
-        ctx.fillStyle=grd;ctx.beginPath();ctx.arc(this.x,this.y,r*4,0,Math.PI*2);ctx.fill();
-        this._star(r,8,0.38);this._star(r*0.7,8,0.45,Math.PI/8);
-        if(this.hovered){
-          ctx.save();
-          ctx.strokeStyle='rgba(220,180,255,'+(0.55+0.35*Math.sin(this.phase*2))+')';
-          ctx.lineWidth=1.5;ctx.setLineDash([5,7]);ctx.lineDashOffset=-this.age*0.6;
-          ctx.beginPath();ctx.arc(this.x,this.y,r*3.2,0,Math.PI*2);ctx.stroke();ctx.restore();
-          if(this.linkIdx>=0){
-            ctx.save();ctx.globalAlpha=0.9;ctx.fillStyle='#fff';
-            ctx.font='bold 11px "Courier New",monospace';ctx.textAlign='center';
-            ctx.fillText(LINKS[this.linkIdx].label,this.x,this.y-r*4.2);ctx.restore();
-          }
-        }
-      }
-      _star(oR,spikes,iF,eR=0){
-        ctx.save();ctx.translate(this.x,this.y);ctx.rotate(this.phase*0.45+eR);
-        ctx.beginPath();const t=spikes*2;
-        for(let i=0;i<t;i++){const rad=i%2===0?oR:oR*iF;const ang=(i/t)*Math.PI*2-Math.PI/2;i===0?ctx.moveTo(rad*Math.cos(ang),rad*Math.sin(ang)):ctx.lineTo(rad*Math.cos(ang),rad*Math.sin(ang));}
-        ctx.closePath();ctx.fillStyle='rgba(255,210,255,0.88)';ctx.fill();ctx.restore();
-      }
-      containsMouse(mx,my){const dx=mx-this.x,dy=my-this.y;return Math.sqrt(dx*dx+dy*dy)<this.hitR;}
-      expired(){if(this.persistent)return false;return this.age>900&&this.particles.length===0;}
-    }
-    const stars=Array.from({length:1600},()=>new Star());
-    let bursts=[],mouse={x:CX,y:CY},cooldown=0,interacted=false;
-    const gap=Math.min(W,H)*0.12;
-    linkBursts=[new Starburst(CX-gap,CY,0),new Starburst(CX+gap,CY,1)];
-    bursts.push(...linkBursts);
-    function drawBg(t){
-      const bg=ctx.createRadialGradient(CX,CY,0,CX,CY,Math.hypot(W,H)*0.7);
-      bg.addColorStop(0,'#1a0030');bg.addColorStop(0.3,'#0e001e');bg.addColorStop(0.6,'#060012');bg.addColorStop(1,'#010005');
-      ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
-    }
-    function drawNeb(t){
-      [{h:285,ox:-120,oy:-60},{h:310,ox:130,oy:70},{h:260,ox:-30,oy:120},{h:330,ox:80,oy:-90}].forEach(function(c){
-        const nx=CX+c.ox+Math.sin(t*0.00047+c.h)*25,ny=CY+c.oy+Math.cos(t*0.00039+c.h)*18;
-        const r=Math.min(W,H)*0.38,g=ctx.createRadialGradient(nx,ny,0,nx,ny,r);
-        g.addColorStop(0,'hsla('+c.h+',85%,40%,0.09)');g.addColorStop(0.5,'hsla('+c.h+',75%,30%,0.04)');g.addColorStop(1,'rgba(0,0,0,0)');
-        ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-      });
-    }
-    function drawCore(t){
-      const p=0.88+0.12*Math.sin(t*0.001),cr=Math.min(W,H)*0.08*p;
-      const g=ctx.createRadialGradient(CX,CY,0,CX,CY,cr*4);
-      g.addColorStop(0,'rgba(255,240,255,'+(0.35*p)+')');g.addColorStop(0.15,'rgba(255,160,240,'+(0.25*p)+')');
-      g.addColorStop(0.4,'rgba(180,60,255,'+(0.15*p)+')');g.addColorStop(0.7,'rgba(80,10,160,'+(0.07*p)+')');
-      g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(CX,CY,cr*4,0,Math.PI*2);ctx.fill();
-    }
-    function depthSort(){return stars.slice().sort(function(a,b){return Math.sin(a.theta)*a.rho-Math.sin(b.theta)*b.rho;});}
-    canvas.addEventListener('mousemove',function(e){
-      mouse.x=e.clientX;mouse.y=e.clientY;var ob=false;
-      bursts.forEach(function(b){b.hovered=b.containsMouse(mouse.x,mouse.y);if(b.hovered)ob=true;});
-      canvas.style.cursor=ob?'pointer':'crosshair';
-      if(!ob&&cooldown<=0){
-        var d=bursts.filter(function(b){return!b.persistent;});
-        if(d.length>=5){var o=d[0];bursts=bursts.filter(function(b){return b!==o;});}
-        bursts.push(new Starburst(mouse.x,mouse.y));cooldown=55;
-        if(!interacted){interacted=true;hint.style.opacity='0';}
-      }
-    });
-    canvas.addEventListener('click',function(e){
-      var mx=e.clientX,my=e.clientY;
-      var hit=bursts.find(function(b){return b.containsMouse(mx,my)&&b.linkIdx>=0;});
-      if(hit){window.open(LINKS[hit.linkIdx].url,'_blank','noopener,noreferrer');}
-      else{var d=bursts.filter(function(b){return!b.persistent;});if(d.length>=5){var o=d[0];bursts=bursts.filter(function(b){return b!==o;});}bursts.push(new Starburst(mx,my));cooldown=30;}
-    });
-    canvas.addEventListener('mouseleave',function(){bursts.forEach(function(b){b.hovered=false;});canvas.style.cursor='crosshair';});
-    var sorted=depthSort(),sortTimer=0;
-    function loop(t){
-      requestAnimationFrame(loop);if(cooldown>0)cooldown--;
-      if(++sortTimer>=20){sorted=depthSort();sortTimer=0;}
-      drawBg(t);drawNeb(t);drawCore(t);
-      stars.forEach(function(s){s.step();});sorted.forEach(function(s){s.draw();});
-      bursts.forEach(function(b){b.step();});bursts.forEach(function(b){b.draw();});
-      bursts=bursts.filter(function(b){return!b.expired();});
-    }
-    requestAnimationFrame(loop);
-  })();
-  </script>
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Liam Barnes | Startup Marketer, AI Tinkerer</title>
-  <meta name="description" content="Startup marketer, attempting to tinker with AI enough so that I seem smarter than I actually am." />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌌</text></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>ð</text></svg>" />
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -255,24 +47,26 @@
 
   <script>
   (() => {
-    // ── LINKS ── clickable starburst destinations ───────────────────────
+    // ââ LINKS ââ clickable starburst destinations âââââââââââââââââââââââ
     const LINKS = [
-      { label: '→ LinkedIn', url: 'https://www.linkedin.com/in/liambarnes44/' },
-      { label: '→ Capsule',  url: 'https://trycapsule.ai' },
+      { label: 'â LinkedIn', url: 'https://www.linkedin.com/in/liambarnes44/' },
+      { label: 'â Capsule',  url: 'https://trycapsule.ai' },
     ];
-    // ─────────────────────────────────────────────────────────────────────
+    // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
     const canvas = document.getElementById('c');
     const ctx    = canvas.getContext('2d');
     const hint   = document.getElementById('hint');
 
     let W, H, CX, CY;
+    let linkBursts = null;
 
     function resize() {
       W = canvas.width  = window.innerWidth;
       H = canvas.height = window.innerHeight;
       CX = W / 2;
       CY = H / 2;
+      // Reposition persistent link bursts on resize
       if (linkBursts && linkBursts.length === 2) {
         const gap = Math.min(W, H) * 0.12;
         linkBursts[0].x = CX - gap;
@@ -284,6 +78,7 @@
     resize();
     window.addEventListener('resize', resize);
 
+    // ââ PALETTE ââ purple / magenta / pink galaxy ââââââââââââââââââââââââ
     const STAR_COLORS = [
       [255,255,255], [240,220,255], [255,200,240],
       [220,160,255], [255,130,220], [180,140,255],
@@ -296,8 +91,10 @@
       return { r, g, b };
     }
 
+    // ââ STAR âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     class Star {
       constructor() { this.reset(true); }
+
       reset(init = false) {
         const maxR = Math.min(W, H) * 0.42;
         this.rho   = maxR * (0.05 + Math.pow(Math.random(), 0.55) * 0.95);
@@ -308,9 +105,14 @@
           this.theta += (Math.random() - 0.5) * 0.8;
         }
         this.yy = (Math.random() - 0.5) * Math.min(W, H) * 0.38;
+
         const normR = this.rho / maxR;
         this.dtheta = (0.0008 + (1 - normR) * 0.0035) * (Math.random() < 0.85 ? 1 : -0.4);
-        if (!init) { this.theta += (Math.random() - 0.5) * 0.3; }
+
+        if (!init) {
+          this.theta += (Math.random() - 0.5) * 0.3;
+        }
+
         this.baseSize  = 0.4 + Math.random() * 2.2;
         this.baseAlpha = 0.35 + Math.random() * 0.65;
         this.twinkle   = Math.random() * Math.PI * 2;
@@ -318,23 +120,36 @@
         const c = pickColor();
         this.r = c.r; this.g = c.g; this.b = c.b;
       }
-      step() { this.theta += this.dtheta; this.twinkle += this.twinkleSpd; }
+
+      step() {
+        this.theta  += this.dtheta;
+        this.twinkle += this.twinkleSpd;
+      }
+
       project(fov = 520) {
         const x3 = Math.cos(this.theta) * this.rho;
         const y3 = this.yy;
         const z3 = Math.sin(this.theta) * this.rho;
         const zd   = z3 + fov + Math.min(W, H) * 0.42 + 10;
         const scale = fov / zd;
-        return { sx: CX + x3 * scale, sy: CY + y3 * scale * 0.55, scale };
+        return {
+          sx   : CX + x3 * scale,
+          sy   : CY + y3 * scale * 0.55,
+          scale,
+        };
       }
+
       draw() {
         const { sx, sy, scale } = this.project();
         if (sx < -20 || sx > W + 20 || sy < -20 || sy > H + 20) return;
+
         const tw    = 0.78 + 0.22 * Math.sin(this.twinkle);
         const alpha = this.baseAlpha * tw * Math.min(1, scale * 2.2);
         const size  = Math.max(0.3, this.baseSize * scale * 1.8);
+
         ctx.save();
         ctx.globalAlpha = alpha;
+
         if (this.baseAlpha > 0.65 && size > 0.9) {
           const haloR = size * 4.5;
           const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, haloR);
@@ -346,6 +161,7 @@
           ctx.arc(sx, sy, haloR, 0, Math.PI * 2);
           ctx.fill();
         }
+
         ctx.fillStyle = `rgb(${this.r},${this.g},${this.b})`;
         ctx.beginPath();
         ctx.arc(sx, sy, size, 0, Math.PI * 2);
@@ -354,25 +170,33 @@
       }
     }
 
+    // ââ PARTICLE (starburst piece) âââââââââââââââââââââââââââââââââââââââââ
     class Particle {
       constructor(x, y, burst = false) {
         this.x = x; this.y = y;
         const angle = Math.random() * Math.PI * 2;
-        const spd   = burst ? (2 + Math.random() * 7) : (0.5 + Math.random() * 3);
+        const spd   = burst
+          ? (2 + Math.random() * 7)
+          : (0.5 + Math.random() * 3);
         this.vx   = Math.cos(angle) * spd;
         this.vy   = Math.sin(angle) * spd;
         this.life = 1;
         this.decay= 0.008 + Math.random() * 0.022;
         this.size = 0.8 + Math.random() * 2.5;
-        const hue = 270 + Math.random() * 60;
+        // Magenta â pink â purple palette
+        const hue = 270 + Math.random() * 60;   // 270â330 range
         const lit = 70 + Math.random() * 30;
         this.hue  = hue; this.lit = lit;
       }
+
       step() {
-        this.x += this.vx; this.y += this.vy;
+        this.x += this.vx;
+        this.y += this.vy;
         this.vx *= 0.96; this.vy *= 0.96;
-        this.life -= this.decay; this.size *= 0.975;
+        this.life -= this.decay;
+        this.size *= 0.975;
       }
+
       draw() {
         if (this.life <= 0) return;
         ctx.save();
@@ -383,36 +207,53 @@
         ctx.fill();
         ctx.restore();
       }
+
       alive() { return this.life > 0 && this.size > 0.05; }
     }
 
+    // ââ STARBURST âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     class Starburst {
       constructor(x, y, linkIdx = -1) {
         this.x = x; this.y = y;
-        this.linkIdx   = linkIdx;
-        this.persistent = linkIdx >= 0;
+        this.linkIdx   = linkIdx;      // -1 = no link (decorative)
+        this.persistent = linkIdx >= 0; // link bursts never expire
         this.phase     = 0;
         this.age       = 0;
         this.hovered   = false;
         this.particles = [];
-        for (let i = 0; i < 120; i++) { this.particles.push(new Particle(x, y, true)); }
+        // Initial explosion
+        for (let i = 0; i < 120; i++) {
+          this.particles.push(new Particle(x, y, true));
+        }
       }
+
       get hitR() { return 38 + 14 * Math.sin(this.phase); }
+
       step() {
-        this.phase += 0.04; this.age++;
+        this.phase += 0.04;
+        this.age++;
         this.particles = this.particles.filter(p => p.alive());
         this.particles.forEach(p => p.step());
+
+        // Persistent link bursts keep generating ambient particles
         if (this.persistent && this.particles.length < 8) {
           this.particles.push(new Particle(this.x, this.y, false));
         }
+
         if (this.hovered) {
-          for (let i = 0; i < 10; i++) { this.particles.push(new Particle(this.x, this.y, false)); }
+          for (let i = 0; i < 10; i++) {
+            this.particles.push(new Particle(this.x, this.y, false));
+          }
         }
       }
+
       draw() {
         this.particles.forEach(p => p.draw());
+
         const pulse = 0.82 + 0.18 * Math.sin(this.phase);
         const r     = 22 * pulse;
+
+        // Outer radial glow â magenta / purple theme
         const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r * 4);
         grd.addColorStop(0,   `rgba(255,180,255,${0.75 * pulse})`);
         grd.addColorStop(0.35,`rgba(200,60,255,${0.35 * pulse})`);
@@ -422,8 +263,14 @@
         ctx.beginPath();
         ctx.arc(this.x, this.y, r * 4, 0, Math.PI * 2);
         ctx.fill();
+
+        // 8-point star shape
         this._star(r, 8, 0.38);
+
+        // Second overlapping star rotated 22.5deg
         this._star(r * 0.7, 8, 0.45, Math.PI / 8);
+
+        // Hover ring + label
         if (this.hovered) {
           ctx.save();
           ctx.strokeStyle = `rgba(220,180,255,${0.55 + 0.35 * Math.sin(this.phase * 2)})`;
@@ -434,6 +281,8 @@
           ctx.arc(this.x, this.y, r * 3.2, 0, Math.PI * 2);
           ctx.stroke();
           ctx.restore();
+
+          // Label
           if (this.linkIdx >= 0) {
             ctx.save();
             ctx.globalAlpha  = 0.9;
@@ -446,6 +295,7 @@
           }
         }
       }
+
       _star(outerR, spikes, innerFrac, extraRot = 0) {
         ctx.save();
         ctx.translate(this.x, this.y);
@@ -464,16 +314,19 @@
         ctx.fill();
         ctx.restore();
       }
+
       containsMouse(mx, my) {
         const dx = mx - this.x, dy = my - this.y;
         return Math.sqrt(dx * dx + dy * dy) < this.hitR;
       }
+
       expired() {
         if (this.persistent) return false;
         return this.age > 900 && this.particles.length === 0;
       }
     }
 
+    // ââ SCENE SETUP âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     const STAR_COUNT = 1600;
     const stars = Array.from({ length: STAR_COUNT }, () => new Star());
     let bursts  = [];
@@ -481,13 +334,15 @@
     let cooldown = 0;
     let interacted = false;
 
+    // ââ PERSISTENT LINK STARBURSTS ââââââââââââââââââââââââââââââââââââââ
     const gap = Math.min(W, H) * 0.12;
-    const linkBursts = [
-      new Starburst(CX - gap, CY, 0),
-      new Starburst(CX + gap, CY, 1),
+    linkBursts = [
+      new Starburst(CX - gap, CY, 0),  // LinkedIn (left of center)
+      new Starburst(CX + gap, CY, 1),  // Capsule  (right of center)
     ];
     bursts.push(...linkBursts);
 
+    // ââ BACKGROUND LAYERS ââââââââââââââââââââââââââââââââââââââââââââââââ
     function drawBackground(t) {
       const bg = ctx.createRadialGradient(CX, CY, 0, CX, CY, Math.hypot(W, H) * 0.7);
       bg.addColorStop(0,   '#1a0030');
@@ -500,10 +355,10 @@
 
     function drawNebulae(t) {
       const clouds = [
-        { hue: 285, ox: -120, oy: -60 },
-        { hue: 310, ox:  130, oy:  70 },
-        { hue: 260, ox:  -30, oy:  120 },
-        { hue: 330, ox:   80, oy: -90 },
+        { hue: 285, ox: -120, oy: -60 },   // magenta-purple
+        { hue: 310, ox:  130, oy:  70 },   // pink-magenta
+        { hue: 260, ox:  -30, oy:  120 },  // blue-purple
+        { hue: 330, ox:   80, oy: -90 },   // hot pink
       ];
       clouds.forEach(({ hue, ox, oy }) => {
         const nx = CX + ox + Math.sin(t * 0.00047 + hue) * 25;
@@ -541,15 +396,21 @@
       });
     }
 
+    // ââ MOUSE HANDLING ââââââââââââââââââââââââââââââââââââââââââââââââââââ
     canvas.addEventListener('mousemove', e => {
-      mouse.x = e.clientX; mouse.y = e.clientY;
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+
       let overBurst = false;
       bursts.forEach(b => {
         b.hovered = b.containsMouse(mouse.x, mouse.y);
         if (b.hovered) overBurst = true;
       });
+
       canvas.style.cursor = overBurst ? 'pointer' : 'crosshair';
+
       if (!overBurst && cooldown <= 0) {
+        // Cap concurrent decorative bursts (don't remove persistent ones)
         const decorative = bursts.filter(b => !b.persistent);
         if (decorative.length >= 5) {
           const oldest = decorative[0];
@@ -557,7 +418,10 @@
         }
         bursts.push(new Starburst(mouse.x, mouse.y));
         cooldown = 55;
-        if (!interacted) { interacted = true; hint.style.opacity = '0'; }
+        if (!interacted) {
+          interacted = true;
+          hint.style.opacity = '0';
+        }
       }
     });
 
@@ -582,22 +446,31 @@
       canvas.style.cursor = 'crosshair';
     });
 
+    // ââ MAIN LOOP âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
     let sorted = starsDepthSorted();
     let sortTimer = 0;
 
     function loop(t) {
       requestAnimationFrame(loop);
       if (cooldown > 0) cooldown--;
-      if (++sortTimer >= 20) { sorted = starsDepthSorted(); sortTimer = 0; }
+
+      if (++sortTimer >= 20) {
+        sorted = starsDepthSorted();
+        sortTimer = 0;
+      }
+
       drawBackground(t);
       drawNebulae(t);
       drawCore(t);
+
       stars.forEach(s => s.step());
       sorted.forEach(s => s.draw());
+
       bursts.forEach(b => b.step());
       bursts.forEach(b => b.draw());
       bursts = bursts.filter(b => !b.expired());
     }
+
     requestAnimationFrame(loop);
   })();
   </script>
