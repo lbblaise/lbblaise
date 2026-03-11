@@ -3,475 +3,975 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Liam Barnes | Startup Marketer, AI Tinkerer</title>
-  <meta name="description" content="Startup marketer, attempting to tinker with AI enough so that I seem smarter than I actually am." />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>ð</text></svg>" />
+  <title>Liam Barnes â Marketer Who Ships</title>
+  <meta name="description" content="Startup marketer and AI builder. I build things, then I market them." />
+  <meta name="author" content="Liam Barnes" />
+  <meta property="og:title" content="Liam Barnes â Marketer Who Ships" />
+  <meta property="og:description" content="Startup marketer and AI builder. I build things, then I market them." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.liambbarnes.com" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>â¡</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap" rel="stylesheet" />
+
   <style>
+    /* ââ RESET & CUSTOM PROPERTIES ââââââââââââââââââââââââââââââââ */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-    html, body {
-      width: 100%; height: 100%;
-      background: #000;
-      overflow: hidden;
+    :root {
+      --cream: #FAF7F2;
+      --charcoal: #1A1A1A;
+      --amber: #D4872C;
+      --terracotta: #B85C3A;
+      --warm-gray: #8A8578;
+      --surface: #F0ECE3;
+      --surface-hover: #E8E3D8;
+      --border: #DDD7CA;
+
+      --font-serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+      --font-sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+      --max-w: 1200px;
+      --gutter: clamp(1.25rem, 4vw, 3rem);
     }
 
-    canvas {
-      display: block;
-      cursor: crosshair;
+    html {
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    #hint {
+    body {
+      font-family: var(--font-sans);
+      font-size: clamp(1rem, 1.05vw, 1.125rem);
+      line-height: 1.65;
+      color: var(--charcoal);
+      background: var(--cream);
+      overflow-x: hidden;
+    }
+
+    ::selection {
+      background: var(--amber);
+      color: #fff;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img { display: block; max-width: 100%; }
+
+    /* ââ NAV ââââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    .nav {
       position: fixed;
-      bottom: 28px;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 1.25rem var(--gutter);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(250, 247, 242, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.3s, background 0.3s;
+    }
+
+    .nav.scrolled {
+      border-bottom-color: var(--border);
+    }
+
+    .nav-name {
+      font-family: var(--font-serif);
+      font-size: 1.35rem;
+      letter-spacing: -0.02em;
+      color: var(--charcoal);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.875rem;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      color: var(--warm-gray);
+      transition: color 0.25s;
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 1.5px;
+      background: var(--amber);
+      transition: width 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--charcoal);
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    /* Mobile hamburger */
+    .nav-toggle {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .nav-toggle span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--charcoal);
+      margin: 5px 0;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+
+    /* ââ HERO âââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 6rem var(--gutter) 4rem;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .hero-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 0.8s 0.2s forwards;
+    }
+
+    .hero h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(3.2rem, 8vw, 7rem);
+      font-weight: 400;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      color: var(--charcoal);
+      margin-bottom: 1.5rem;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeUp 0.9s 0.35s forwards;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      color: var(--amber);
+    }
+
+    .hero-sub {
+      font-size: clamp(1.1rem, 1.8vw, 1.35rem);
+      color: var(--warm-gray);
+      max-width: 560px;
+      line-height: 1.6;
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 0.9s 0.55s forwards;
+    }
+
+    .hero-ctas {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeUp 0.9s 0.7s forwards;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 2rem;
+      border-radius: 6px;
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--charcoal);
+      color: var(--cream);
+    }
+
+    .btn-primary:hover {
+      background: var(--amber);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(212, 135, 44, 0.25);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--charcoal);
+      border: 1.5px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--amber);
+      color: var(--amber);
+      transform: translateY(-2px);
+    }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 2.5rem;
       left: 50%;
       transform: translateX(-50%);
-      color: rgba(220, 160, 255, 0.55);
-      font: 12px/1 'Courier New', monospace;
-      letter-spacing: 3px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--warm-gray);
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      pointer-events: none;
-      white-space: nowrap;
-      animation: breathe 3s ease-in-out infinite;
-      transition: opacity 1s;
+      opacity: 0;
+      animation: fadeUp 0.9s 1s forwards;
     }
 
-    @keyframes breathe {
-      0%, 100% { opacity: 0.3; }
-      50%       { opacity: 0.9; }
+    .hero-scroll .line {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--amber), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.4; transform: scaleY(0.6); }
+      50% { opacity: 1; transform: scaleY(1); }
+    }
+
+    /* ââ SECTIONS SHARED âââââââââââââââââââââââââââââââââââââââââ */
+    section {
+      padding: clamp(4rem, 8vw, 8rem) var(--gutter);
+    }
+
+    .container {
+      max-width: var(--max-w);
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+      font-weight: 400;
+      line-height: 1.15;
+      letter-spacing: -0.025em;
+      margin-bottom: 2rem;
+    }
+
+    /* ââ ABOUT ââââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    #about {
+      background: var(--surface);
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(2rem, 5vw, 5rem);
+      align-items: start;
+    }
+
+    .about-text p {
+      margin-bottom: 1.25rem;
+      color: #3a3a3a;
+    }
+
+    .about-text p:first-of-type::first-line {
+      font-weight: 600;
+    }
+
+    .about-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .stat {
+      padding: 1.5rem;
+      background: var(--cream);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .stat-number {
+      font-family: var(--font-serif);
+      font-size: 2.2rem;
+      color: var(--amber);
+      line-height: 1.1;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--warm-gray);
+      margin-top: 0.35rem;
+    }
+
+    .about-experience {
+      margin-top: 3rem;
+    }
+
+    .exp-item {
+      display: flex;
+      gap: 1.5rem;
+      padding: 1.25rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .exp-item:last-child {
+      border-bottom: none;
+    }
+
+    .exp-role {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .exp-company {
+      color: var(--amber);
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .exp-date {
+      color: var(--warm-gray);
+      font-size: 0.8rem;
+      white-space: nowrap;
+      min-width: 100px;
+    }
+
+    /* ââ PROJECTS âââââââââââââââââââââââââââââââââââââââââââââââââ */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 1rem;
+    }
+
+    .project-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2.5rem;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+    }
+
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--amber), var(--terracotta));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s ease;
+    }
+
+    .project-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(26, 26, 26, 0.08);
+      border-color: var(--amber);
+      background: var(--cream);
+    }
+
+    .project-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .project-tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--amber);
+      background: rgba(212, 135, 44, 0.1);
+      padding: 0.3rem 0.75rem;
+      border-radius: 4px;
+      margin-bottom: 1.25rem;
+    }
+
+    .project-card h3 {
+      font-family: var(--font-serif);
+      font-size: 1.75rem;
+      font-weight: 400;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.02em;
+    }
+
+    .project-card p {
+      color: var(--warm-gray);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+
+    .project-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--charcoal);
+      transition: color 0.25s, gap 0.25s;
+    }
+
+    .project-card:hover .project-link {
+      color: var(--amber);
+      gap: 0.65rem;
+    }
+
+    /* ââ WRITING ââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    #writing {
+      background: var(--surface);
+    }
+
+    .writing-intro {
+      max-width: 600px;
+      color: var(--warm-gray);
+      margin-bottom: 3rem;
+      font-size: 1.05rem;
+    }
+
+    .writing-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .writing-card {
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 2rem;
+      transition: all 0.35s ease;
+      cursor: pointer;
+      display: block;
+    }
+
+    .writing-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 36px rgba(26, 26, 26, 0.06);
+      border-color: var(--amber);
+    }
+
+    .writing-card-date {
+      font-size: 0.75rem;
+      color: var(--warm-gray);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+
+    .writing-card h3 {
+      font-family: var(--font-serif);
+      font-size: 1.3rem;
+      font-weight: 400;
+      line-height: 1.3;
+      margin-bottom: 0.65rem;
+      letter-spacing: -0.01em;
+    }
+
+    .writing-card p {
+      font-size: 0.88rem;
+      color: var(--warm-gray);
+      line-height: 1.55;
+    }
+
+    /* ââ CONTACT ââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    #contact {
+      text-align: center;
+    }
+
+    .contact-inner {
+      max-width: 620px;
+      margin: 0 auto;
+    }
+
+    .contact-inner .section-title {
+      margin-bottom: 1rem;
+    }
+
+    .contact-subtitle {
+      color: var(--warm-gray);
+      font-size: 1.1rem;
+      margin-bottom: 2.5rem;
+      line-height: 1.6;
+    }
+
+    .contact-links {
+      display: flex;
+      justify-content: center;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .contact-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1.75rem;
+      border: 1.5px solid var(--border);
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--charcoal);
+      transition: all 0.3s ease;
+    }
+
+    .contact-pill:hover {
+      border-color: var(--amber);
+      color: var(--amber);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(212, 135, 44, 0.15);
+    }
+
+    .contact-pill svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ââ FOOTER âââââââââââââââââââââââââââââââââââââââââââââââââââ */
+    footer {
+      padding: 2.5rem var(--gutter);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--warm-gray);
+      border-top: 1px solid var(--border);
+    }
+
+    /* ââ ANIMATIONS âââââââââââââââââââââââââââââââââââââââââââââââ */
+    @keyframes fadeUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Stagger children inside revealed containers */
+    .reveal-stagger > * {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .reveal-stagger.visible > * {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-stagger.visible > *:nth-child(1) { transition-delay: 0s; }
+    .reveal-stagger.visible > *:nth-child(2) { transition-delay: 0.1s; }
+    .reveal-stagger.visible > *:nth-child(3) { transition-delay: 0.2s; }
+    .reveal-stagger.visible > *:nth-child(4) { transition-delay: 0.3s; }
+
+    /* ââ RESPONSIVE âââââââââââââââââââââââââââââââââââââââââââââââ */
+    @media (max-width: 900px) {
+      .about-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .projects-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .writing-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .nav-links {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 260px;
+        background: var(--cream);
+        flex-direction: column;
+        padding: 5rem 2rem 2rem;
+        gap: 1.5rem;
+        transform: translateX(100%);
+        transition: transform 0.35s ease;
+        border-left: 1px solid var(--border);
+        box-shadow: -8px 0 30px rgba(0,0,0,0.06);
+      }
+
+      .nav-links.open {
+        transform: translateX(0);
+      }
+
+      .nav-links a {
+        font-size: 1rem;
+      }
+
+      .nav-toggle {
+        display: block;
+        z-index: 110;
+      }
+
+      .nav-toggle.active span:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 5px);
+      }
+
+      .nav-toggle.active span:nth-child(2) {
+        opacity: 0;
+      }
+
+      .nav-toggle.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(5px, -5px);
+      }
+
+      .hero h1 {
+        font-size: clamp(2.5rem, 10vw, 3.8rem);
+      }
+
+      .about-stats {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .hero-scroll {
+        display: none;
+      }
+
+      .exp-item {
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .about-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ââ GRAIN OVERLAY ââââââââââââââââââââââââââââââââââââââââââââ */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
     }
   </style>
 </head>
 <body>
-  <canvas id="c"></canvas>
-  <div id="hint">hover a starburst &bull; click to connect</div>
 
+  <!-- ââ NAV ââââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <nav class="nav" role="navigation" aria-label="Main navigation">
+    <a href="#" class="nav-name">Liam Barnes</a>
+    <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" role="list">
+      <li><a href="#about">About</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#writing">Writing</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- ââ HERO âââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section class="hero" id="home" aria-label="Introduction">
+    <div class="hero-label">Startup Marketer &amp; AI Builder</div>
+    <h1>I build things.<br/>Then I <em>market</em> them.</h1>
+    <p class="hero-sub">Head of Marketing at Legion Security. Founder of Capsule AI. I sit at the intersection of growth strategy and building products people actually use.</p>
+    <div class="hero-ctas">
+      <a href="#projects" class="btn btn-primary">See my work â</a>
+      <a href="#contact" class="btn btn-secondary">Get in touch</a>
+    </div>
+    <div class="hero-scroll" aria-hidden="true">
+      <span class="line"></span>
+    </div>
+  </section>
+
+  <!-- ââ ABOUT ââââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section id="about" aria-label="About Liam">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-text reveal">
+          <span class="section-label">About</span>
+          <h2 class="section-title">Marketer who codes.<br/>Builder who sells.</h2>
+          <p>Most marketers talk about products. I build them. Most builders ignore distribution. I obsess over it. That's the gap I live in â the space where making something great meets making sure people actually find it.</p>
+          <p>I've spent my career in the trenches of startup growth â from pre-revenue to acquisition. I've built demand gen engines, led pipeline that contributed to 1000% ARR growth, and shipped AI products on nights and weekends because I can't stop tinkering.</p>
+          <p>Right now I'm Head of Marketing at Legion Security, where I lead the go-to-market strategy. On the side, I'm building Capsule AI and Momentum â because the best way to understand a market is to build for it.</p>
+        </div>
+
+        <div>
+          <div class="about-stats reveal reveal-stagger">
+            <div class="stat">
+              <div class="stat-number">8K+</div>
+              <div class="stat-label">LinkedIn followers</div>
+            </div>
+            <div class="stat">
+              <div class="stat-number">1000%</div>
+              <div class="stat-label">ARR growth (Bionic)</div>
+            </div>
+            <div class="stat">
+              <div class="stat-number">$3.5M+</div>
+              <div class="stat-label">Pipeline generated</div>
+            </div>
+            <div class="stat">
+              <div class="stat-number">2</div>
+              <div class="stat-label">AI products shipped</div>
+            </div>
+          </div>
+
+          <div class="about-experience reveal">
+            <div class="exp-item">
+              <span class="exp-date">2023 â Now</span>
+              <div>
+                <div class="exp-role">Head of Marketing</div>
+                <div class="exp-company">Legion Security</div>
+              </div>
+            </div>
+            <div class="exp-item">
+              <span class="exp-date">2022 â 2023</span>
+              <div>
+                <div class="exp-role">Head of Demand Gen</div>
+                <div class="exp-company">Bionic â CrowdStrike</div>
+              </div>
+            </div>
+            <div class="exp-item">
+              <span class="exp-date">2021 â 2022</span>
+              <div>
+                <div class="exp-role">Demand Generation Manager</div>
+                <div class="exp-company">Bionic</div>
+              </div>
+            </div>
+            <div class="exp-item">
+              <span class="exp-date">2020 â 2021</span>
+              <div>
+                <div class="exp-role">SEO Manager</div>
+                <div class="exp-company">Harness</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ââ PROJECTS âââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section id="projects" aria-label="Projects">
+    <div class="container">
+      <span class="section-label reveal">Projects</span>
+      <h2 class="section-title reveal">Things I've built.</h2>
+
+      <div class="projects-grid reveal-stagger reveal">
+        <a href="https://trycapsule.ai" target="_blank" rel="noopener noreferrer" class="project-card">
+          <span class="project-tag">AI &times; Marketing</span>
+          <h3>Capsule AI</h3>
+          <p>An AI campaign builder for startup marketers. Onboard your brand, and Capsule generates publish-ready campaign assets â from brand voice to full content pipeline.</p>
+          <span class="project-link">Visit trycapsule.ai <span aria-hidden="true">â</span></span>
+        </a>
+
+        <div class="project-card">
+          <span class="project-tag">AI &times; Coaching</span>
+          <h3>Momentum</h3>
+          <p>An AI life coach that tracks your growth across career, health, relationships, and purpose. Daily sessions, commitment tracking, and personalized guidance.</p>
+          <span class="project-link">Coming soon <span aria-hidden="true">â</span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ââ WRITING ââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section id="writing" aria-label="Writing">
+    <div class="container">
+      <span class="section-label reveal">Writing</span>
+      <h2 class="section-title reveal">Thinking out loud.</h2>
+      <p class="writing-intro reveal">I write about startup marketing, building with AI, and the messy reality of trying to do both at once. No thought leadership theater â just what I'm actually learning.</p>
+
+      <div class="writing-grid reveal reveal-stagger">
+        <div class="writing-card">
+          <div class="writing-card-date">Coming soon</div>
+          <h3>Why most startup marketers should learn to code</h3>
+          <p>The gap between "marketing person" and "person who builds marketing tools" is closing fast.</p>
+        </div>
+        <div class="writing-card">
+          <div class="writing-card-date">Coming soon</div>
+          <h3>The AI campaign stack I actually use</h3>
+          <p>Not the tools I tell people about â the ones I open every morning at 6am.</p>
+        </div>
+        <div class="writing-card">
+          <div class="writing-card-date">Coming soon</div>
+          <h3>From Bionic to CrowdStrike: lessons from a $350M acquisition</h3>
+          <p>What I learned about growth, timing, and the things that matter after the deal closes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ââ CONTACT ââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <section id="contact" aria-label="Contact">
+    <div class="container">
+      <div class="contact-inner reveal">
+        <span class="section-label">Contact</span>
+        <h2 class="section-title">Let's build something.</h2>
+        <p class="contact-subtitle">I'm always open to conversations about startup marketing, AI products, or interesting problems worth solving.</p>
+        <div class="contact-links">
+          <a href="https://www.linkedin.com/in/liambarnes44/" target="_blank" rel="noopener noreferrer" class="contact-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+            LinkedIn
+          </a>
+          <a href="https://trycapsule.ai" target="_blank" rel="noopener noreferrer" class="contact-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+            Capsule AI
+          </a>
+          <a href="mailto:barnesliamb@gmail.com" class="contact-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            Email
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ââ FOOTER âââââââââââââââââââââââââââââââââââââââââââââââââ -->
+  <footer>
+    <p>Liam Barnes Â© 2026. Built by hand, not by template.</p>
+  </footer>
+
+  <!-- ââ SCRIPTS ââââââââââââââââââââââââââââââââââââââââââââââââ -->
   <script>
   (() => {
-    // ââ LINKS ââ clickable starburst destinations âââââââââââââââââââââââ
-    const LINKS = [
-      { label: 'â LinkedIn', url: 'https://www.linkedin.com/in/liambarnes44/' },
-      { label: 'â Capsule',  url: 'https://trycapsule.ai' },
-    ];
-    // âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+    'use strict';
 
-    const canvas = document.getElementById('c');
-    const ctx    = canvas.getContext('2d');
-    const hint   = document.getElementById('hint');
+    // ââ Nav scroll effect ââââââââââââââââââââââââââââââââââââââ
+    const nav = document.querySelector('.nav');
+    let lastScroll = 0;
 
-    let W, H, CX, CY;
-    let linkBursts = null;
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      nav.classList.toggle('scrolled', scrollY > 40);
+      lastScroll = scrollY;
+    }, { passive: true });
 
-    function resize() {
-      W = canvas.width  = window.innerWidth;
-      H = canvas.height = window.innerHeight;
-      CX = W / 2;
-      CY = H / 2;
-      // Reposition persistent link bursts on resize
-      if (linkBursts && linkBursts.length === 2) {
-        const gap = Math.min(W, H) * 0.12;
-        linkBursts[0].x = CX - gap;
-        linkBursts[0].y = CY;
-        linkBursts[1].x = CX + gap;
-        linkBursts[1].y = CY;
-      }
-    }
-    resize();
-    window.addEventListener('resize', resize);
+    // ââ Mobile nav toggle ââââââââââââââââââââââââââââââââââââââ
+    const toggle = document.querySelector('.nav-toggle');
+    const navLinks = document.querySelector('.nav-links');
 
-    // ââ PALETTE ââ purple / magenta / pink galaxy ââââââââââââââââââââââââ
-    const STAR_COLORS = [
-      [255,255,255], [240,220,255], [255,200,240],
-      [220,160,255], [255,130,220], [180,140,255],
-      [255,180,255], [200,200,255], [255,160,200],
-      [170,120,255],
-    ];
-
-    function pickColor() {
-      const [r,g,b] = STAR_COLORS[Math.floor(Math.random() * STAR_COLORS.length)];
-      return { r, g, b };
-    }
-
-    // ââ STAR âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-    class Star {
-      constructor() { this.reset(true); }
-
-      reset(init = false) {
-        const maxR = Math.min(W, H) * 0.42;
-        this.rho   = maxR * (0.05 + Math.pow(Math.random(), 0.55) * 0.95);
-        this.theta = Math.random() * Math.PI * 2;
-        if (Math.random() < 0.6) {
-          const arm = Math.floor(Math.random() * 3);
-          this.theta += (arm / 3) * Math.PI * 2 + (this.rho / maxR) * Math.PI * 3;
-          this.theta += (Math.random() - 0.5) * 0.8;
-        }
-        this.yy = (Math.random() - 0.5) * Math.min(W, H) * 0.38;
-
-        const normR = this.rho / maxR;
-        this.dtheta = (0.0008 + (1 - normR) * 0.0035) * (Math.random() < 0.85 ? 1 : -0.4);
-
-        if (!init) {
-          this.theta += (Math.random() - 0.5) * 0.3;
-        }
-
-        this.baseSize  = 0.4 + Math.random() * 2.2;
-        this.baseAlpha = 0.35 + Math.random() * 0.65;
-        this.twinkle   = Math.random() * Math.PI * 2;
-        this.twinkleSpd= 0.015 + Math.random() * 0.045;
-        const c = pickColor();
-        this.r = c.r; this.g = c.g; this.b = c.b;
-      }
-
-      step() {
-        this.theta  += this.dtheta;
-        this.twinkle += this.twinkleSpd;
-      }
-
-      project(fov = 520) {
-        const x3 = Math.cos(this.theta) * this.rho;
-        const y3 = this.yy;
-        const z3 = Math.sin(this.theta) * this.rho;
-        const zd   = z3 + fov + Math.min(W, H) * 0.42 + 10;
-        const scale = fov / zd;
-        return {
-          sx   : CX + x3 * scale,
-          sy   : CY + y3 * scale * 0.55,
-          scale,
-        };
-      }
-
-      draw() {
-        const { sx, sy, scale } = this.project();
-        if (sx < -20 || sx > W + 20 || sy < -20 || sy > H + 20) return;
-
-        const tw    = 0.78 + 0.22 * Math.sin(this.twinkle);
-        const alpha = this.baseAlpha * tw * Math.min(1, scale * 2.2);
-        const size  = Math.max(0.3, this.baseSize * scale * 1.8);
-
-        ctx.save();
-        ctx.globalAlpha = alpha;
-
-        if (this.baseAlpha > 0.65 && size > 0.9) {
-          const haloR = size * 4.5;
-          const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, haloR);
-          g.addColorStop(0,   `rgba(${this.r},${this.g},${this.b},0.35)`);
-          g.addColorStop(0.5, `rgba(${this.r},${this.g},${this.b},0.08)`);
-          g.addColorStop(1,   'rgba(0,0,0,0)');
-          ctx.fillStyle = g;
-          ctx.beginPath();
-          ctx.arc(sx, sy, haloR, 0, Math.PI * 2);
-          ctx.fill();
-        }
-
-        ctx.fillStyle = `rgb(${this.r},${this.g},${this.b})`;
-        ctx.beginPath();
-        ctx.arc(sx, sy, size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-    }
-
-    // ââ PARTICLE (starburst piece) âââââââââââââââââââââââââââââââââââââââââ
-    class Particle {
-      constructor(x, y, burst = false) {
-        this.x = x; this.y = y;
-        const angle = Math.random() * Math.PI * 2;
-        const spd   = burst
-          ? (2 + Math.random() * 7)
-          : (0.5 + Math.random() * 3);
-        this.vx   = Math.cos(angle) * spd;
-        this.vy   = Math.sin(angle) * spd;
-        this.life = 1;
-        this.decay= 0.008 + Math.random() * 0.022;
-        this.size = 0.8 + Math.random() * 2.5;
-        // Magenta â pink â purple palette
-        const hue = 270 + Math.random() * 60;   // 270â330 range
-        const lit = 70 + Math.random() * 30;
-        this.hue  = hue; this.lit = lit;
-      }
-
-      step() {
-        this.x += this.vx;
-        this.y += this.vy;
-        this.vx *= 0.96; this.vy *= 0.96;
-        this.life -= this.decay;
-        this.size *= 0.975;
-      }
-
-      draw() {
-        if (this.life <= 0) return;
-        ctx.save();
-        ctx.globalAlpha = Math.max(0, this.life);
-        ctx.fillStyle   = `hsl(${this.hue},100%,${this.lit}%)`;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, Math.max(0.1, this.size), 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-
-      alive() { return this.life > 0 && this.size > 0.05; }
-    }
-
-    // ââ STARBURST âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-    class Starburst {
-      constructor(x, y, linkIdx = -1) {
-        this.x = x; this.y = y;
-        this.linkIdx   = linkIdx;      // -1 = no link (decorative)
-        this.persistent = linkIdx >= 0; // link bursts never expire
-        this.phase     = 0;
-        this.age       = 0;
-        this.hovered   = false;
-        this.particles = [];
-        // Initial explosion
-        for (let i = 0; i < 120; i++) {
-          this.particles.push(new Particle(x, y, true));
-        }
-      }
-
-      get hitR() { return 38 + 14 * Math.sin(this.phase); }
-
-      step() {
-        this.phase += 0.04;
-        this.age++;
-        this.particles = this.particles.filter(p => p.alive());
-        this.particles.forEach(p => p.step());
-
-        // Persistent link bursts keep generating ambient particles
-        if (this.persistent && this.particles.length < 8) {
-          this.particles.push(new Particle(this.x, this.y, false));
-        }
-
-        if (this.hovered) {
-          for (let i = 0; i < 10; i++) {
-            this.particles.push(new Particle(this.x, this.y, false));
-          }
-        }
-      }
-
-      draw() {
-        this.particles.forEach(p => p.draw());
-
-        const pulse = 0.82 + 0.18 * Math.sin(this.phase);
-        const r     = 22 * pulse;
-
-        // Outer radial glow â magenta / purple theme
-        const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r * 4);
-        grd.addColorStop(0,   `rgba(255,180,255,${0.75 * pulse})`);
-        grd.addColorStop(0.35,`rgba(200,60,255,${0.35 * pulse})`);
-        grd.addColorStop(0.7, `rgba(100,20,180,${0.12 * pulse})`);
-        grd.addColorStop(1,   'rgba(0,0,0,0)');
-        ctx.fillStyle = grd;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, r * 4, 0, Math.PI * 2);
-        ctx.fill();
-
-        // 8-point star shape
-        this._star(r, 8, 0.38);
-
-        // Second overlapping star rotated 22.5deg
-        this._star(r * 0.7, 8, 0.45, Math.PI / 8);
-
-        // Hover ring + label
-        if (this.hovered) {
-          ctx.save();
-          ctx.strokeStyle = `rgba(220,180,255,${0.55 + 0.35 * Math.sin(this.phase * 2)})`;
-          ctx.lineWidth   = 1.5;
-          ctx.setLineDash([5, 7]);
-          ctx.lineDashOffset = -this.age * 0.6;
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, r * 3.2, 0, Math.PI * 2);
-          ctx.stroke();
-          ctx.restore();
-
-          // Label
-          if (this.linkIdx >= 0) {
-            ctx.save();
-            ctx.globalAlpha  = 0.9;
-            ctx.fillStyle    = '#fff';
-            ctx.font         = 'bold 11px "Courier New", monospace';
-            ctx.textAlign    = 'center';
-            ctx.letterSpacing= '2px';
-            ctx.fillText(LINKS[this.linkIdx].label, this.x, this.y - r * 4.2);
-            ctx.restore();
-          }
-        }
-      }
-
-      _star(outerR, spikes, innerFrac, extraRot = 0) {
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.phase * 0.45 + extraRot);
-        ctx.beginPath();
-        const total = spikes * 2;
-        for (let i = 0; i < total; i++) {
-          const rad = i % 2 === 0 ? outerR : outerR * innerFrac;
-          const ang = (i / total) * Math.PI * 2 - Math.PI / 2;
-          i === 0
-            ? ctx.moveTo(rad * Math.cos(ang), rad * Math.sin(ang))
-            : ctx.lineTo(rad * Math.cos(ang), rad * Math.sin(ang));
-        }
-        ctx.closePath();
-        ctx.fillStyle = `rgba(255,210,255,0.88)`;
-        ctx.fill();
-        ctx.restore();
-      }
-
-      containsMouse(mx, my) {
-        const dx = mx - this.x, dy = my - this.y;
-        return Math.sqrt(dx * dx + dy * dy) < this.hitR;
-      }
-
-      expired() {
-        if (this.persistent) return false;
-        return this.age > 900 && this.particles.length === 0;
-      }
-    }
-
-    // ââ SCENE SETUP âââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-    const STAR_COUNT = 1600;
-    const stars = Array.from({ length: STAR_COUNT }, () => new Star());
-    let bursts  = [];
-    let mouse   = { x: CX, y: CY };
-    let cooldown = 0;
-    let interacted = false;
-
-    // ââ PERSISTENT LINK STARBURSTS ââââââââââââââââââââââââââââââââââââââ
-    const gap = Math.min(W, H) * 0.12;
-    linkBursts = [
-      new Starburst(CX - gap, CY, 0),  // LinkedIn (left of center)
-      new Starburst(CX + gap, CY, 1),  // Capsule  (right of center)
-    ];
-    bursts.push(...linkBursts);
-
-    // ââ BACKGROUND LAYERS ââââââââââââââââââââââââââââââââââââââââââââââââ
-    function drawBackground(t) {
-      const bg = ctx.createRadialGradient(CX, CY, 0, CX, CY, Math.hypot(W, H) * 0.7);
-      bg.addColorStop(0,   '#1a0030');
-      bg.addColorStop(0.3, '#0e001e');
-      bg.addColorStop(0.6, '#060012');
-      bg.addColorStop(1,   '#010005');
-      ctx.fillStyle = bg;
-      ctx.fillRect(0, 0, W, H);
-    }
-
-    function drawNebulae(t) {
-      const clouds = [
-        { hue: 285, ox: -120, oy: -60 },   // magenta-purple
-        { hue: 310, ox:  130, oy:  70 },   // pink-magenta
-        { hue: 260, ox:  -30, oy:  120 },  // blue-purple
-        { hue: 330, ox:   80, oy: -90 },   // hot pink
-      ];
-      clouds.forEach(({ hue, ox, oy }) => {
-        const nx = CX + ox + Math.sin(t * 0.00047 + hue) * 25;
-        const ny = CY + oy + Math.cos(t * 0.00039 + hue) * 18;
-        const r  = Math.min(W, H) * 0.38;
-        const g  = ctx.createRadialGradient(nx, ny, 0, nx, ny, r);
-        g.addColorStop(0,   `hsla(${hue},85%,40%,0.09)`);
-        g.addColorStop(0.5, `hsla(${hue},75%,30%,0.04)`);
-        g.addColorStop(1,   'rgba(0,0,0,0)');
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, W, H);
-      });
-    }
-
-    function drawCore(t) {
-      const pulse = 0.88 + 0.12 * Math.sin(t * 0.001);
-      const cr    = Math.min(W, H) * 0.08 * pulse;
-      const g = ctx.createRadialGradient(CX, CY, 0, CX, CY, cr * 4);
-      g.addColorStop(0,   `rgba(255,240,255,${0.35 * pulse})`);
-      g.addColorStop(0.15,`rgba(255,160,240,${0.25 * pulse})`);
-      g.addColorStop(0.4, `rgba(180,60,255,${0.15 * pulse})`);
-      g.addColorStop(0.7, `rgba(80,10,160,${0.07 * pulse})`);
-      g.addColorStop(1,   'rgba(0,0,0,0)');
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.arc(CX, CY, cr * 4, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    function starsDepthSorted() {
-      return stars.slice().sort((a, b) => {
-        const za = Math.sin(a.theta) * a.rho;
-        const zb = Math.sin(b.theta) * b.rho;
-        return za - zb;
-      });
-    }
-
-    // ââ MOUSE HANDLING ââââââââââââââââââââââââââââââââââââââââââââââââââââ
-    canvas.addEventListener('mousemove', e => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-
-      let overBurst = false;
-      bursts.forEach(b => {
-        b.hovered = b.containsMouse(mouse.x, mouse.y);
-        if (b.hovered) overBurst = true;
-      });
-
-      canvas.style.cursor = overBurst ? 'pointer' : 'crosshair';
-
-      if (!overBurst && cooldown <= 0) {
-        // Cap concurrent decorative bursts (don't remove persistent ones)
-        const decorative = bursts.filter(b => !b.persistent);
-        if (decorative.length >= 5) {
-          const oldest = decorative[0];
-          bursts = bursts.filter(b => b !== oldest);
-        }
-        bursts.push(new Starburst(mouse.x, mouse.y));
-        cooldown = 55;
-        if (!interacted) {
-          interacted = true;
-          hint.style.opacity = '0';
-        }
-      }
+    toggle.addEventListener('click', () => {
+      const isOpen = navLinks.classList.toggle('open');
+      toggle.classList.toggle('active');
+      toggle.setAttribute('aria-expanded', isOpen);
     });
 
-    canvas.addEventListener('click', e => {
-      const mx = e.clientX, my = e.clientY;
-      const hit = bursts.find(b => b.containsMouse(mx, my) && b.linkIdx >= 0);
-      if (hit) {
-        window.open(LINKS[hit.linkIdx].url, '_blank', 'noopener,noreferrer');
-      } else {
-        const decorative = bursts.filter(b => !b.persistent);
-        if (decorative.length >= 5) {
-          const oldest = decorative[0];
-          bursts = bursts.filter(b => b !== oldest);
+    // Close on link click
+    navLinks.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        navLinks.classList.remove('open');
+        toggle.classList.remove('active');
+        toggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    // ââ Scroll reveal ââââââââââââââââââââââââââââââââââââââââââ
+    const reveals = document.querySelectorAll('.reveal');
+    const observerOpts = { threshold: 0.12, rootMargin: '0px 0px -40px 0px' };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
         }
-        bursts.push(new Starburst(mx, my));
-        cooldown = 30;
-      }
+      });
+    }, observerOpts);
+
+    reveals.forEach(el => observer.observe(el));
+
+    // ââ Smooth scroll for anchor links âââââââââââââââââââââââââ
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', (e) => {
+        const target = document.querySelector(anchor.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
     });
 
-    canvas.addEventListener('mouseleave', () => {
-      bursts.forEach(b => { b.hovered = false; });
-      canvas.style.cursor = 'crosshair';
-    });
+    // ââ Active nav link highlight ââââââââââââââââââââââââââââââ
+    const sections = document.querySelectorAll('section[id]');
+    const navAnchors = document.querySelectorAll('.nav-links a');
 
-    // ââ MAIN LOOP âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
-    let sorted = starsDepthSorted();
-    let sortTimer = 0;
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          navAnchors.forEach(a => {
+            a.style.color = a.getAttribute('href') === `#${id}` ? 'var(--charcoal)' : '';
+          });
+        }
+      });
+    }, { threshold: 0.3 });
 
-    function loop(t) {
-      requestAnimationFrame(loop);
-      if (cooldown > 0) cooldown--;
-
-      if (++sortTimer >= 20) {
-        sorted = starsDepthSorted();
-        sortTimer = 0;
-      }
-
-      drawBackground(t);
-      drawNebulae(t);
-      drawCore(t);
-
-      stars.forEach(s => s.step());
-      sorted.forEach(s => s.draw());
-
-      bursts.forEach(b => b.step());
-      bursts.forEach(b => b.draw());
-      bursts = bursts.filter(b => !b.expired());
-    }
-
-    requestAnimationFrame(loop);
+    sections.forEach(s => sectionObserver.observe(s));
   })();
   </script>
 </body>
